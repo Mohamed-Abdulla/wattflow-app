@@ -1,0 +1,205 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/app_widgets.dart';
+import '../../domain/entities/device.dart';
+import '../controllers/devices_controller.dart';
+import '../widgets/device_card.dart';
+
+class DeviceListPage extends ConsumerStatefulWidget {
+  const DeviceListPage({super.key});
+  @override
+  ConsumerState<DeviceListPage> createState() => _DeviceListPageState();
+}
+
+class _DeviceListPageState extends ConsumerState<DeviceListPage> {
+  final _searchController = TextEditingController();
+  String _filter = 'all';
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final devices = ref.watch(devicesControllerProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Devices'),
+        actions: [
+          IconButton(
+            onPressed: () =>
+                ref.read(devicesControllerProvider.notifier).refresh(),
+            tooltip: 'Refresh devices',
+            icon: const Icon(Icons.refresh),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/devices/new'),
+        icon: const Icon(Icons.add),
+        label: const Text('Add device'),
+      ),
+      body: ResponsiveContainer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Manage your energy devices',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Monitor status and keep device details up to date.',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: const InputDecoration(
+                      labelText: 'Search devices',
+                      prefixIcon: Icon(Icons.search),
+                      suffixIcon: Tooltip(
+                        message: 'Search by name, type, or room',
+                        child: Icon(Icons.info_outline),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                DropdownButton<String>(
+                  value: _filter,
+                  items: const [
+                    DropdownMenuItem(value: 'all', child: Text('All devices')),
+                    DropdownMenuItem(value: 'online', child: Text('Online')),
+                    DropdownMenuItem(value: 'offline', child: Text('Offline')),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _filter = value ?? 'all'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: devices.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => ErrorState(
+                  message: error is Exception
+                      ? error.toString()
+                      : 'Please try again.',
+                  onRetry: () =>
+                      ref.read(devicesControllerProvider.notifier).refresh(),
+                ),
+                data: (items) {
+                  final filtered = items.where(_matches).toList();
+                  if (items.isEmpty) {
+                    return EmptyState(
+                      title: 'No devices yet',
+                      message:
+                          'Add your first device to start monitoring energy.',
+                      action: FilledButton.icon(
+                        onPressed: () => context.push('/devices/new'),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add device'),
+                      ),
+                    );
+                  }
+                  if (filtered.isEmpty) {
+                    return const EmptyState(
+                      title: 'No matching devices',
+                      message: 'Try a different search or filter.',
+                    );
+                  }
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final columns = constraints.maxWidth >= 900
+                          ? 3
+                          : constraints.maxWidth >= 600
+                          ? 2
+                          : 1;
+                      return RefreshIndicator(
+                        onRefresh: () => ref
+                            .read(devicesControllerProvider.notifier)
+                            .refresh(),
+                        child: GridView.builder(
+                          padding: const EdgeInsets.only(bottom: 90),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columns,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                childAspectRatio: columns == 1 ? 2.2 : 1.45,
+                              ),
+                          itemCount: filtered.length,
+                          itemBuilder: (_, index) {
+                            final device = filtered[index];
+                            return DeviceCard(
+                              device: device,
+                              onTap: () =>
+                                  context.push('/devices/${device.id}'),
+                              onEdit: () =>
+                                  context.push('/devices/${device.id}/edit'),
+                              onDelete: () => _confirmDelete(device),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _matches(Device device) {
+    final query = _searchController.text.trim().toLowerCase();
+    final matchesQuery =
+        query.isEmpty ||
+        device.name.toLowerCase().contains(query) ||
+        device.room.toLowerCase().contains(query) ||
+        device.type.label.toLowerCase().contains(query);
+    final matchesFilter =
+        _filter == 'all' ||
+        (_filter == 'online' && device.isOnline) ||
+        (_filter == 'offline' && !device.isOnline);
+    return matchesQuery && matchesFilter;
+  }
+
+  Future<void> _confirmDelete(Device device) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete device?'),
+        content: Text('Remove “${device.name}” from WattFlow?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await ref.read(devicesControllerProvider.notifier).delete(device.id);
+      if (mounted && ref.read(devicesControllerProvider).hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not delete the device.')),
+        );
+      }
+    }
+  }
+}
