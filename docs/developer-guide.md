@@ -149,8 +149,9 @@ Use the shared design system under `lib/app/theme/`:
 - `AppDurations` for future animation timing.
 - `AppBreakpoints` for responsive layout thresholds.
 - `WattFlowColors` for WattFlow-specific semantic colors such as online, offline, and energy accents.
+- `AppTypography` for the application type scale and font weights.
 
-Use `Theme.of(context).colorScheme` for standard Material colors and `Theme.of(context).textTheme` for typography. Do not add arbitrary `Color`, font-size, spacing, or breakpoint literals inside feature widgets unless the value is genuinely local to that component.
+Use `Theme.of(context).colorScheme` for standard Material colors and `Theme.of(context).textTheme` for typography. Use semantic roles such as `headlineMedium`, `titleMedium`, `bodyLarge`, `bodySmall`, and `labelLarge`; do not hard-code font sizes or weights in feature widgets unless the value is genuinely local to that component. The type scale preserves Flutter's platform-native font family and is defined once in `AppTypography`.
 
 Do not create a large `AppConstants` or `AppColors` bucket. Add a token only when it represents a repeated design decision. Keep semantic colors in `ColorScheme` or a `ThemeExtension` so light and dark themes remain coherent.
 

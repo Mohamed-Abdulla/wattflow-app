@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_radii.dart';
 import 'app_sizes.dart';
+import 'app_typography.dart';
 import 'wattflow_colors.dart';
 
 abstract final class AppTheme {
@@ -18,6 +19,7 @@ abstract final class AppTheme {
       colorScheme: scheme,
       brightness: brightness,
       useMaterial3: true,
+      textTheme: AppTypography.textTheme(brightness),
       scaffoldBackgroundColor: scheme.surface,
       extensions: [brandColors],
       inputDecorationTheme: const InputDecorationTheme(
