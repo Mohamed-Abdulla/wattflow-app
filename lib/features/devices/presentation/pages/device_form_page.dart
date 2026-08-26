@@ -1,34 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/error/app_failure.dart';
+import '../../../../core/widgets/app_feedback.dart';
+import '../../../../core/widgets/app_widgets.dart';
 import '../../domain/entities/device.dart';
 import '../controllers/devices_controller.dart';
 
-class DeviceFormPage extends ConsumerStatefulWidget {
+class DeviceFormPage extends ConsumerWidget {
   const DeviceFormPage({this.deviceId, super.key});
+
   final String? deviceId;
+
   @override
-  ConsumerState<DeviceFormPage> createState() => _DeviceFormPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (deviceId == null) {
+      return const _DeviceFormView();
+    }
+
+    final devicesState = ref.watch(devicesControllerProvider);
+    return devicesState.when(
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Edit device')),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        appBar: AppBar(title: const Text('Edit device')),
+        body: ErrorState(
+          message: userFacingErrorMessage(
+            error,
+            fallback: 'Could not load device details. Please try again.',
+          ),
+          onRetry: () => ref.read(devicesControllerProvider.notifier).refresh(),
+        ),
+      ),
+      data: (devices) {
+        final device = devices.where((item) => item.id == deviceId).firstOrNull;
+        if (device == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Edit device')),
+            body: ErrorState(
+              message: 'This device is no longer available.',
+              onRetry: () => context.pop(),
+            ),
+          );
+        }
+        return _DeviceFormView(device: device);
+      },
+    );
+  }
 }
 
-class _DeviceFormPageState extends ConsumerState<DeviceFormPage> {
+class _DeviceFormView extends ConsumerStatefulWidget {
+  const _DeviceFormView({this.device});
+
+  final Device? device;
+
+  @override
+  ConsumerState<_DeviceFormView> createState() => _DeviceFormViewState();
+}
+
+class _DeviceFormViewState extends ConsumerState<_DeviceFormView> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _name;
   late final TextEditingController _room;
-  DeviceType? _type;
+  late DeviceType? _type;
   bool _saving = false;
+
+  bool get _isEditing => widget.device != null;
+
   @override
   void initState() {
     super.initState();
-    final devicesState = ref.read(devicesControllerProvider);
-    final devices = devicesState is AsyncData<List<Device>>
-        ? devicesState.value
-        : null;
-    final device = devices
-        ?.where((item) => item.id == widget.deviceId)
-        .firstOrNull;
-    _name = TextEditingController(text: device?.name);
-    _room = TextEditingController(text: device?.room);
-    _type = device?.type;
+    _name = TextEditingController(text: widget.device?.name);
+    _room = TextEditingController(text: widget.device?.room);
+    _type = widget.device?.type;
   }
 
   @override
@@ -40,9 +87,7 @@ class _DeviceFormPageState extends ConsumerState<DeviceFormPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(widget.deviceId == null ? 'Add device' : 'Edit device'),
-    ),
+    appBar: AppBar(title: Text(_isEditing ? 'Edit device' : 'Add device')),
     body: Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 560),
@@ -54,9 +99,7 @@ class _DeviceFormPageState extends ConsumerState<DeviceFormPage> {
               shrinkWrap: true,
               children: [
                 Text(
-                  widget.deviceId == null
-                      ? 'Connect a device'
-                      : 'Update device details',
+                  _isEditing ? 'Update device details' : 'Connect a device',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 24),
@@ -107,33 +150,34 @@ class _DeviceFormPageState extends ConsumerState<DeviceFormPage> {
       ),
     ),
   );
+
   String? _required(String? value) =>
       value == null || value.trim().isEmpty ? 'This field is required' : null;
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate() || _type == null) return;
+
     setState(() => _saving = true);
     final controller = ref.read(devicesControllerProvider.notifier);
     try {
-      if (widget.deviceId == null) {
-        await controller.add(
+      if (_isEditing) {
+        await controller.updateDevice(
+          id: widget.device!.id,
           name: _name.text.trim(),
           type: _type!,
           room: _room.text.trim(),
         );
       } else {
-        await controller.updateDevice(
-          id: widget.deviceId!,
+        await controller.add(
           name: _name.text.trim(),
           type: _type!,
           room: _room.text.trim(),
         );
       }
-      if (mounted) Navigator.pop(context);
-    } catch (_) {
+      if (mounted) context.pop();
+    } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not save the device.')),
-        );
+        AppSnackBar.showError(context, error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

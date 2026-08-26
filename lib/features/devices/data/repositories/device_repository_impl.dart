@@ -11,6 +11,7 @@ final class DeviceRepositoryImpl implements DeviceRepository {
   @override
   Future<List<Device>> getDevices() async =>
       _memoryCache ??= await _dataSource.getDevices();
+
   @override
   Future<Device> getDevice(String id) async {
     final cached = _memoryCache?.where((device) => device.id == id).firstOrNull;

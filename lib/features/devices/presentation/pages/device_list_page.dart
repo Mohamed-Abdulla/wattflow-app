@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../core/error/app_failure.dart';
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_widgets.dart';
 import '../../domain/entities/device.dart';
 import '../controllers/devices_controller.dart';
@@ -90,9 +93,7 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
               child: devices.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => ErrorState(
-                  message: error is Exception
-                      ? error.toString()
-                      : 'Please try again.',
+                  message: userFacingErrorMessage(error),
                   onRetry: () =>
                       ref.read(devicesControllerProvider.notifier).refresh(),
                 ),
@@ -194,11 +195,12 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
       ),
     );
     if (confirmed == true && mounted) {
-      await ref.read(devicesControllerProvider.notifier).delete(device.id);
-      if (mounted && ref.read(devicesControllerProvider).hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not delete the device.')),
-        );
+      try {
+        await ref.read(devicesControllerProvider.notifier).delete(device.id);
+      } catch (error) {
+        if (mounted) {
+          AppSnackBar.showError(context, error);
+        }
       }
     }
   }

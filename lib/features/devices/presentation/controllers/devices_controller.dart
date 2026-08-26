@@ -44,18 +44,15 @@ class DevicesController extends _$DevicesController {
   }
 
   Future<void> _runMutation(Future<Object?> Function() mutation) async {
-    final previous = state is AsyncData<List<Device>>
-        ? (state as AsyncData<List<Device>>).value
-        : null;
-    state = const AsyncLoading<List<Device>>();
+    final previousState = state;
     try {
       await mutation();
       state = AsyncData(await _repository.getDevices());
     } catch (error, stackTrace) {
-      state = AsyncError<List<Device>>(error, stackTrace);
-      if (previous != null) {
-        state = AsyncError<List<Device>>(error, stackTrace);
-      }
+      // Mutations do not replace the visible list with an error screen. The
+      // caller can show the error while the last successful data stays visible.
+      state = previousState;
+      Error.throwWithStackTrace(error, stackTrace);
     }
   }
 }

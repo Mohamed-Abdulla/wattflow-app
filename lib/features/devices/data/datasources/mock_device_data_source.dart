@@ -8,8 +8,10 @@ final class MockDeviceDataSource implements DeviceDataSource {
 
   @override
   Future<List<Device>> getDevices() async => List.unmodifiable(_devices);
+
   @override
   Future<Device> getDevice(String id) async => _find(id);
+
   @override
   Future<Device> createDevice({
     required String name,
@@ -51,6 +53,7 @@ final class MockDeviceDataSource implements DeviceDataSource {
 
   @override
   Future<void> deleteDevice(String id) async => _devices.remove(_find(id));
+
   Device _find(String id) =>
       _devices.where((device) => device.id == id).firstOrNull ??
       (throw const NotFoundFailure());

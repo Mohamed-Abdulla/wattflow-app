@@ -44,3 +44,8 @@ final class UnexpectedFailure extends AppFailure {
         technicalDetails: details,
       );
 }
+
+String userFacingErrorMessage(
+  Object error, {
+  String fallback = 'Something went wrong. Please try again.',
+}) => error is AppFailure ? error.message : fallback;
