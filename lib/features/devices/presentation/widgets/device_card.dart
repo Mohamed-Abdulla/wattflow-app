@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../app/theme/app_sizes.dart';
+import '../../../../app/theme/app_spacing.dart';
 import '../../domain/entities/device.dart';
 import 'device_status_indicator.dart';
 
@@ -19,14 +22,14 @@ class DeviceCard extends StatelessWidget {
     child: InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 CircleAvatar(child: Icon(_icon(device.type))),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.xl),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +58,7 @@ class DeviceCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: AppSpacing.xxl),
             Row(
               children: [
                 Expanded(
@@ -67,15 +70,15 @@ class DeviceCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
                 Icon(
                   Icons.room_outlined,
-                  size: 18,
+                  size: AppSizes.iconSm,
                   color: Theme.of(context).colorScheme.outline,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(device.room),
               ],
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/app_failure.dart';
 import '../../../../core/widgets/app_widgets.dart';
 import '../../domain/entities/device.dart';
@@ -71,12 +72,12 @@ class _DeviceDetailsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(device.name, style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             device.type.label,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
           AppCard(
             child: Column(
               children: [
@@ -115,11 +116,11 @@ class _DeviceDetailsView extends StatelessWidget {
     String? value, {
     Widget? trailing,
   }) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 14),
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
     child: Row(
       children: [
         Icon(icon, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Expanded(child: Text(label)),
         trailing ?? Text(value ?? ''),
       ],

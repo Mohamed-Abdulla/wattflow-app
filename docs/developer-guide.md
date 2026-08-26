@@ -139,6 +139,21 @@ Pages should not:
 
 Use mounted checks after awaiting before using `BuildContext` or calling `setState`.
 
+## Design system and primitives
+
+Use the shared design system under `lib/app/theme/`:
+
+- `AppSpacing` for layout gaps and padding.
+- `AppSizes` for shared dimensions, touch targets, and content widths.
+- `AppRadii` for consistent corner radii.
+- `AppDurations` for future animation timing.
+- `AppBreakpoints` for responsive layout thresholds.
+- `WattFlowColors` for WattFlow-specific semantic colors such as online, offline, and energy accents.
+
+Use `Theme.of(context).colorScheme` for standard Material colors and `Theme.of(context).textTheme` for typography. Do not add arbitrary `Color`, font-size, spacing, or breakpoint literals inside feature widgets unless the value is genuinely local to that component.
+
+Do not create a large `AppConstants` or `AppColors` bucket. Add a token only when it represents a repeated design decision. Keep semantic colors in `ColorScheme` or a `ThemeExtension` so light and dark themes remain coherent.
+
 ## Testing expectations
 
 Add tests with every production feature:

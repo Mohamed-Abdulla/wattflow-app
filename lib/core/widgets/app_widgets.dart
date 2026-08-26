@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/app_sizes.dart';
+import '../../app/theme/app_spacing.dart';
+
 class ResponsiveContainer extends StatelessWidget {
   const ResponsiveContainer({required this.child, super.key});
   final Widget child;
   @override
   Widget build(BuildContext context) => Center(
     child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 1200),
-      child: Padding(padding: const EdgeInsets.all(24), child: child),
+      constraints: const BoxConstraints(maxWidth: AppSizes.maxContentWidth),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: child,
+      ),
     ),
   );
 }
@@ -20,7 +26,10 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     child: InkWell(
       onTap: onTap,
-      child: Padding(padding: const EdgeInsets.all(20), child: child),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: child,
+      ),
     ),
   );
 }
@@ -45,11 +54,11 @@ class EmptyState extends StatelessWidget {
           size: 56,
           color: Theme.of(context).colorScheme.primary,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         Text(title, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(message),
-        if (action != null) ...[const SizedBox(height: 20), action!],
+        if (action != null) ...[const SizedBox(height: AppSpacing.xl), action!],
       ],
     ),
   );

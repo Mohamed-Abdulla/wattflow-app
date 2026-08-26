@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/error/app_failure.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_widgets.dart';
+import '../../../../app/theme/app_sizes.dart';
+import '../../../../app/theme/app_spacing.dart';
 import '../../domain/entities/device.dart';
 import '../controllers/devices_controller.dart';
 
@@ -90,9 +92,9 @@ class _DeviceFormViewState extends ConsumerState<_DeviceFormView> {
     appBar: AppBar(title: Text(_isEditing ? 'Edit device' : 'Add device')),
     body: Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
+        constraints: const BoxConstraints(maxWidth: AppSizes.formMaxWidth),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Form(
             key: _formKey,
             child: ListView(
@@ -102,14 +104,14 @@ class _DeviceFormViewState extends ConsumerState<_DeviceFormView> {
                   _isEditing ? 'Update device details' : 'Connect a device',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xxl),
                 TextFormField(
                   controller: _name,
                   textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(labelText: 'Name'),
                   validator: _required,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 DropdownButtonFormField<DeviceType>(
                   initialValue: _type,
                   decoration: const InputDecoration(labelText: 'Type'),
@@ -124,7 +126,7 @@ class _DeviceFormViewState extends ConsumerState<_DeviceFormView> {
                   onChanged: (value) => setState(() => _type = value),
                   validator: (value) => value == null ? 'Select a type' : null,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 TextFormField(
                   controller: _room,
                   textInputAction: TextInputAction.done,
@@ -132,12 +134,12 @@ class _DeviceFormViewState extends ConsumerState<_DeviceFormView> {
                   validator: _required,
                   onFieldSubmitted: (_) => _save(),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xxl),
                 FilledButton.icon(
                   onPressed: _saving ? null : _save,
                   icon: _saving
                       ? const SizedBox.square(
-                          dimension: 18,
+                          dimension: AppSizes.iconSm,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check),

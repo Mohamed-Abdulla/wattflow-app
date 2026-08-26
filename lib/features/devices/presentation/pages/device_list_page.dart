@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/theme/app_breakpoints.dart';
+import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/app_failure.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_widgets.dart';
@@ -37,7 +39,7 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
             tooltip: 'Refresh devices',
             icon: const Icon(Icons.refresh),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -53,12 +55,12 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
               'Manage your energy devices',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'Monitor status and keep device details up to date.',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             Row(
               children: [
                 Expanded(
@@ -75,7 +77,7 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 DropdownButton<String>(
                   value: _filter,
                   items: const [
@@ -88,7 +90,7 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xxl),
             Expanded(
               child: devices.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -119,9 +121,10 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
                   }
                   return LayoutBuilder(
                     builder: (context, constraints) {
-                      final columns = constraints.maxWidth >= 900
+                      final columns =
+                          constraints.maxWidth >= AppBreakpoints.desktop
                           ? 3
-                          : constraints.maxWidth >= 600
+                          : constraints.maxWidth >= AppBreakpoints.tablet
                           ? 2
                           : 1;
                       return RefreshIndicator(
@@ -129,12 +132,14 @@ class _DeviceListPageState extends ConsumerState<DeviceListPage> {
                             .read(devicesControllerProvider.notifier)
                             .refresh(),
                         child: GridView.builder(
-                          padding: const EdgeInsets.only(bottom: 90),
+                          padding: const EdgeInsets.only(
+                            bottom: AppSpacing.section,
+                          ),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: columns,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
+                                crossAxisSpacing: AppSpacing.lg,
+                                mainAxisSpacing: AppSpacing.lg,
                                 childAspectRatio: columns == 1 ? 2.2 : 1.45,
                               ),
                           itemCount: filtered.length,
