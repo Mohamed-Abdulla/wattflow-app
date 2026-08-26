@@ -79,7 +79,10 @@ class DeviceCard extends StatelessWidget {
                   color: Theme.of(context).colorScheme.outline,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Text(device.room),
+                Text(
+                  device.room,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ],
             ),
           ],

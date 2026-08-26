@@ -121,8 +121,11 @@ class _DeviceDetailsView extends StatelessWidget {
       children: [
         Icon(icon, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: AppSpacing.lg),
-        Expanded(child: Text(label)),
-        trailing ?? Text(value ?? ''),
+        Expanded(
+          child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+        ),
+        trailing ??
+            Text(value ?? '', style: Theme.of(context).textTheme.bodyMedium),
       ],
     ),
   );

@@ -22,7 +22,9 @@ class DeviceStatusIndicator extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Text(
           isOnline ? 'Online' : 'Offline',
-          style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(color: statusColor),
         ),
       ],
     );
